@@ -1,0 +1,51 @@
+html {
+    background: #202020;
+    min-height: 100%;
+}
+
+body {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+section.main {
+    height:95%;
+    text-align: center;
+}
+
+footer {
+    height: 5%;
+    color: #404040;
+    text-align: center;
+    border-top:1px solid #282828;
+    padding-top: 5px;
+    box-sizing: border-box;
+}
+
+div.logo {
+    position: absolute;
+    font-size: 17em;
+    transform: translateY(-15%);
+    color: #303030;
+}
+
+div.logo span.hint {
+    font-size: 10em;
+    font-size: 0.3ex;
+    vertical-align: super;
+}
+
+canvas#battlefield {
+    position:absolute;
+    height:600px;
+    width:1200px;
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    z-index: 100;
+    box-shadow: 0px 0px 8px 5px;
+}
