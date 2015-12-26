@@ -1,0 +1,8 @@
+Server:
+ - go run *.go
+
+Client:
+ - To build the client:
+    - `cd client`
+    - `npm install`
+    - `grunt build`
