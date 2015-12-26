@@ -3,17 +3,24 @@
     <head>
         <title>GRts</title>
         <link rel="stylesheet" type="text/css" href="resources/css/style.css">
-        <script type="text/javascript" src="http://cdn.babylonjs.com/2-2/babylon.js"></script>
-        <script type="text/javascript" src="resources/js/dist/grts-client.js"></script>
+        <!--script type="text/javascript" src="http://cdn.babylonjs.com/2-2/babylon.js"></script-->
     </head>
     <body>
         <div class="logo">GRts <span class="hint">FYI that's not a rts</span></div>
         <section class="main">
-            <canvas id="battlefield">
-            </canvas>
+            <div class="connecting" data-bind="if: isConnecting">
+                Connecting...
+            </div>
+            <div class="lobby" data-bind="if: isInLobby">
+                Room
+            </div>
+            <div data-bind="if: isInGame">
+                <canvas id="battlefield"></canvas>
+            </div>
         </section>
         <footer>
-            NFau
+            NFau <span data-bind="text: isConnecting"></span> <span data-bind="text: isInLobby"></span> <span data-bind="text: isInGame"></span>
         </footer>
     </body>
+    <script type="text/javascript" src="resources/js/dist/grts-client.js"></script>
 </html>

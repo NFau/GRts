@@ -16,6 +16,19 @@ section.main {
     text-align: center;
 }
 
+section.main div.connecting {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 6em;
+    color: #292929;
+    top: 50%;
+}
+
+section.main div.lobby {
+
+}
+
 footer {
     height: 5%;
     color: #404040;

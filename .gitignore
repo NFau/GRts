@@ -25,3 +25,6 @@ _testmain.go
 
 # NPM modules
 client/node_modules
+
+# Builded js
+client/js/dist
