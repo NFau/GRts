@@ -32,9 +32,12 @@ _testmain.go
 # Builded js
 /src/GRts/client/js/dist
 
-# Go pkg/bin
+# Go pkg/bin/src
 /pkg/*
 !/pkg/.gitkeep
 
 /bin/*
 !/bin/.gitkeep
+
+/src/*
+!/src/GRts
