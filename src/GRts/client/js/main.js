@@ -1,7 +1,7 @@
-//import WebSocketHandler from './websocket';
-import GameManager from './game'
-import ko from 'knockout'
-import Enum from "es6-enum"
+import GameManager  from "./game"
+import ko           from "knockout"
+import Enum         from "es6-enum"
+import pb           from "protobufjs"
 
 const STEPS = Enum(
     "CONNECT",
@@ -14,7 +14,6 @@ class MainVM {
         this.ws = null;
         this.gameManager = null;
 
-        this.test = ko.observable("test1");
         this.currentStep = ko.observable(STEPS.CONNECT);
 
         this.isConnecting = ko.computed(() => {
@@ -31,12 +30,22 @@ class MainVM {
     }
 
     start() {
+//        this.builder = pb.loadProtoFile("../protocol/lobby.proto")
+//        console.log(this.builder);
+//        this.grtsproto = this.builder.build('grtsproto')
         this.ws = new WebSocket("ws://127.0.0.1:8080/socket");
         this.ws.onopen = (event) => {
             console.log("Connected");
+            this.ws.send("Hello boy");
+            setTimeout(() => {
+                // FIRST INSTRUCTION!!
+                this.ws.send("QUIT GAME");
+            }, 4000)
         };
 
         this.ws.onmessage = (event) => {
+            console.log("Received message", event.data);
+
             if (this.isInGame()) {
                 // TODO: Send info to GM
             } else if (this.isInLobby()) {
@@ -47,7 +56,6 @@ class MainVM {
                 console.log(event)
 //                this.currentStep(STEPS.LOBBY);
             }
-            console.log("Received message", event.data);
         };
 
         this.ws.onclose = (event) => {

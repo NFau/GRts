@@ -6,29 +6,29 @@ import (
 
 /* == Player ==*/
 type Player struct {
-    id      uint
+    id      uint32
     ws      *Connection
     login   string
 }
 
 /* == Player Messages == */
 type PlayerMessage struct {
-    playerId    uint
+    playerId    uint32
     data        []byte
 }
 
 /* == Game ==*/
 type Game struct {
     // Game configuration
-    numberOfPlayers int
+    numberOfPlayers uint32
 
     // Game infos
-    id              uint
-    players         map[uint]*Player
+    id              uint32
+    players         map[uint32]*Player
 
     newPlayer           chan *Player
     recv                chan PlayerMessage
-    unregisterPlayer    chan uint
+    unregisterPlayer    chan uint32
 }
 
 func (this *Game) addPlayer(player *Player) {
@@ -38,13 +38,13 @@ func (this *Game) addPlayer(player *Player) {
     player.ws.send <- []byte("You joined the game " + string(this.id))
 }
 
-func (this *Game) removePlayer(id uint) {
+func (this *Game) removePlayer(id uint32) {
     // Kill recv->generalRecv routine
     this.unregisterPlayer <- id
     delete(this.players, id)
 }
 
-func (this *Game) registerPlayerToGeneralRecv(player *Player, generalRecv chan<- PlayerMessage, unregister <-chan uint) {
+func (this *Game) registerPlayerToGeneralRecv(player *Player, generalRecv chan<- PlayerMessage, unregister <-chan uint32) {
     go func () {
         Info.Println("Registering player recv chan")
         for {
@@ -71,13 +71,13 @@ func (this *Game) registerPlayerToGeneralRecv(player *Player, generalRecv chan<-
 func (this *Game) Run(gameRunning chan<- *Game, gameStopped chan<- *Game) {
     Info.Println("Game", this.id, "init")
 
-    this.players = make(map[uint]*Player)
+    this.players = make(map[uint32]*Player)
     this.recv = make(chan PlayerMessage)
-    this.unregisterPlayer = make(chan uint)
+    this.unregisterPlayer = make(chan uint32)
     // Waiting for player
 
     for {
-        if len(this.players) == this.numberOfPlayers {
+        if uint32(len(this.players)) == this.numberOfPlayers {
             gameRunning <- this
             break;
         }
@@ -88,7 +88,7 @@ func (this *Game) Run(gameRunning chan<- *Game, gameStopped chan<- *Game) {
             this.addPlayer(player)
         case playerMessage := <- this.recv:
             Info.Println("Receive message from Player", playerMessage.playerId, ":", string(playerMessage.data))
-            if bytes.Equal(playerMessage.data, []byte("QUIT GAME")) {
+            if len(playerMessage.data) == 0 || bytes.Equal(playerMessage.data, []byte("QUIT GAME")) {
                 this.removePlayer(playerMessage.playerId)
             }
         }
@@ -112,8 +112,8 @@ type GameManager struct {
     // Map of games (bool: inGame?)
     games       map[*Game]bool
 
-    nextGameId  uint
-    nextPlayerId uint
+    nextGameId  uint32
+    nextPlayerId uint32
 
     gameRunning chan *Game
     gameStopped chan *Game
@@ -140,6 +140,7 @@ func (this GameManager) Run() {
                 id: this.nextPlayerId,
                 login: "Player #" + string(this.nextPlayerId),
             }
+            player.ws.send <- GRTSMessage.Connected(player)
             this.findMatchForPlayer(player)
             this.nextPlayerId++
 

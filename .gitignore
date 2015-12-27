@@ -23,8 +23,18 @@ _testmain.go
 *.test
 *.prof
 
+# Symbolic link
+/client
+
 # NPM modules
-client/node_modules
+/src/GRts/client/node_modules
 
 # Builded js
-client/js/dist
+/src/GRts/client/js/dist
+
+# Go pkg/bin
+/pkg/*
+!/pkg/.gitkeep
+
+/bin/*
+!/bin/.gitkeep
