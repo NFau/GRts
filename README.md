@@ -1,3 +1,14 @@
+Requirements:
+    - go
+    - npm
+    - grunt
+    - protobuf (https://github.com/google/protobuf)
+
+You will need to create a symbolic link to client sources in the root directory
+```
+    ln -s ./src/GRts/client/ ./
+```
+
 Server:
 ```
 # Activate gopath
@@ -7,16 +18,16 @@ Server:
 . ./protobuild.sh
 
 # Run it !
-go run src/GRts/*.go
+go run src/GRts/server/*.go
 
 # Build it...
-go build src/GRts/*.go
+go build src/GRts/server/*.go
 ```
 
 Client:
 ```
-# Go to client directory
-cd src/client/
+# Client directory
+cd src/GRts/client/
 
 # Install dependencies
 npm install
