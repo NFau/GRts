@@ -32,6 +32,10 @@ _testmain.go
 # Builded js
 /src/GRts/client/js/dist
 
+# Protobuf files
+/src/GRts/client/protocol
+/src/GRts/server/protocol
+
 # Go pkg/bin/src
 /pkg/*
 !/pkg/.gitkeep
