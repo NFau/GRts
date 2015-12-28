@@ -2,6 +2,7 @@ package main
 
 import (
     "bytes"
+    "fmt"
 )
 
 /* == Player ==*/
@@ -134,11 +135,12 @@ func (this GameManager) Run() {
         select {
         // New connection
         case connection := <- this.newConnection:
-            Info.Println("New Player ;)")
+            Info.Println("New Player", this.nextPlayerId)
+
             player := &Player{
                 ws: connection,
                 id: this.nextPlayerId,
-                login: "Player #" + string(this.nextPlayerId),
+                login: fmt.Sprintf("Player #%d", this.nextPlayerId),
             }
             player.ws.send <- GRTSMessage.Connected(player)
             this.findMatchForPlayer(player)

@@ -4,17 +4,15 @@ package grtsproto;
 
 /* Server -> Client */
 message Connected {
-    string      event = 1;
-    uint32      player_id = 2;
+    uint32      playerId = 1;
+    string      playerLogin = 2;
 }
 
 message JoinedGame {
-    string      event = 1;
-    uint32      game_id = 2;
+    uint32      gameId = 2;
 }
 
 /* Client -> Server */
 message ChangeName {
-    string      event = 1;
     string      name = 2;
 }
