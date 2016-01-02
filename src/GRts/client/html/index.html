@@ -3,6 +3,7 @@
     <head>
         <title>GRts</title>
         <link rel="stylesheet" type="text/css" href="resources/css/style.css">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         <!--script type="text/javascript" src="http://cdn.babylonjs.com/2-2/babylon.js"></script-->
     </head>
     <body>
@@ -11,8 +12,35 @@
             <div class="connecting" data-bind="if: isConnecting">
                 Connecting...
             </div>
+            <div class="connected" data-bind="if: isConnected">
+                Connected, looking for a game
+            </div>
+            <div class="disconnected" data-bind="if: isDisconnected">
+                Disconnected :-( <br/>
+                Reconnecting... <br/>
+                <span class="smaller">No just kidding, F5 is your friend</span>
+            </div>
             <div class="lobby" data-bind="if: isInLobby">
-                Room
+                <h1 class="name" data-bind="text: lobbyName"></h1>
+                <ul class="players" data-bind="foreach: { data: lobbyPlayers }">
+                    <li data-bind="css: { 'current-player': id == $parent.currentPlayerId() }">
+                        <!-- ko ifnot: id == $parent.currentPlayerId() -->
+                            <span data-bind="text: login"></span>
+                        <!-- /ko -->
+                        <!-- ko if: id == $parent.currentPlayerId() -->
+                            <span>
+                                <!-- ko ifnot: $parent.loginEditMode() -->
+                                    <span class="active" data-bind="text: login"></span>
+                                    <span class="material-icons" data-bind="click: $parent.editLogin.bind($parent)">mode_edit</span>
+                                <!-- /ko -->
+                                <!-- ko if: $parent.loginEditMode() -->
+                                    <input data-bind="textInput: $parent.currentPlayerLogin" />
+                                    <span class="material-icons" data-bind="click: $parent.changeLogin.bind($parent)">check</span>
+                                <!-- /ko -->
+                            </span>
+                        <!-- /ko -->
+                    </li>
+                </ul>
             </div>
             <div data-bind="if: isInGame">
                 <canvas id="battlefield"></canvas>

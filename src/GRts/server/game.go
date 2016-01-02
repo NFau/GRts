@@ -1,8 +1,9 @@
 package main
 
 import (
-    "bytes"
     "fmt"
+    "github.com/golang/protobuf/proto"
+    "GRts/server/protocol"
 )
 
 /* == Player ==*/
@@ -25,6 +26,8 @@ type Game struct {
 
     // Game infos
     id              uint32
+    name            string
+
     players         map[uint32]*Player
 
     newPlayer           chan *Player
@@ -35,14 +38,33 @@ type Game struct {
 func (this *Game) addPlayer(player *Player) {
     this.players[player.id] = player
     this.registerPlayerToGeneralRecv(player, this.recv, this.unregisterPlayer)
-
-    player.ws.send <- []byte("You joined the game " + string(this.id))
 }
 
 func (this *Game) removePlayer(id uint32) {
     // Kill recv->generalRecv routine
     this.unregisterPlayer <- id
     delete(this.players, id)
+}
+
+func (this *Game) broadcast(message []byte, excludedPlayerIds []uint32) {
+    Info.Println("Broadcast")
+    var excluded bool
+    for id, player := range this.players {
+        if len(excludedPlayerIds) > 0 {
+            excluded = false
+            for i := range excludedPlayerIds {
+                if excludedPlayerIds[i] == id {
+                    excluded = true
+                    break
+                }
+            }
+            if excluded {
+                continue
+            }
+        }
+        Info.Println("--->>> SEND")
+        player.ws.send <- message
+    }
 }
 
 func (this *Game) registerPlayerToGeneralRecv(player *Player, generalRecv chan<- PlayerMessage, unregister <-chan uint32) {
@@ -69,6 +91,18 @@ func (this *Game) registerPlayerToGeneralRecv(player *Player, generalRecv chan<-
     }()
 }
 
+func (this *Game) ProcessPlayerMessage(playerId uint32, message *grtsproto.Message) {
+    Info.Println("Receive message from Player", message.Type)
+
+    if message.Type == "CHANGE_LOGIN" {
+        data := &grtsproto.ChangeLogin{}
+        err := proto.Unmarshal(message.Data, data)
+        if err != nil { Error.Println("Error unmarshaling grtsproto.ChangeLogin") }
+        this.players[playerId].login = data.Login
+        this.broadcast(GRTSMessage.PlayerChangedLogin(this.players[playerId]), []uint32{})
+    }
+}
+
 func (this *Game) Run(gameRunning chan<- *Game, gameStopped chan<- *Game) {
     Info.Println("Game", this.id, "init")
 
@@ -84,24 +118,27 @@ func (this *Game) Run(gameRunning chan<- *Game, gameStopped chan<- *Game) {
         }
 
         select {
-        case player := <- this.newPlayer:
+        case newPlayer := <- this.newPlayer:
             Info.Println("Game", this.id, "has a new player")
-            this.addPlayer(player)
+            // Notify other Players that someone joined the game
+            this.addPlayer(newPlayer)
+            this.broadcast(GRTSMessage.PlayerJoinedGame(newPlayer), []uint32{newPlayer.id})
+            newPlayer.ws.send <- GRTSMessage.JoinedGame(this)
         case playerMessage := <- this.recv:
-            Info.Println("Receive message from Player", playerMessage.playerId, ":", string(playerMessage.data))
-            if len(playerMessage.data) == 0 || bytes.Equal(playerMessage.data, []byte("QUIT GAME")) {
-                this.removePlayer(playerMessage.playerId)
-            }
+            message := &grtsproto.Message{}
+            err := proto.Unmarshal(playerMessage.data, message)
+            if err != nil { Error.Println("Error unmarshaling grtsproto.Message") }
+            this.ProcessPlayerMessage(playerMessage.playerId, message)
         }
     }
 
     for {
         select{
         case playerMessage := <- this.recv:
-            Info.Println("Receive message from Player", playerMessage.playerId, ":", string(playerMessage.data))
-            if bytes.Equal(playerMessage.data, []byte("QUIT GAME")) {
-                this.removePlayer(playerMessage.playerId)
-            }
+            message := &grtsproto.Message{}
+            err := proto.Unmarshal(playerMessage.data, message)
+            if err != nil { Error.Println("Error unmarshaling grtsproto.Message") }
+            this.ProcessPlayerMessage(playerMessage.playerId, message)
         }
     }
 }
@@ -136,7 +173,6 @@ func (this GameManager) Run() {
         // New connection
         case connection := <- this.newConnection:
             Info.Println("New Player", this.nextPlayerId)
-
             player := &Player{
                 ws: connection,
                 id: this.nextPlayerId,
@@ -164,6 +200,7 @@ func (this *GameManager) createGame(player *Player) {
     // Create game and add it to the game list
     newGame := &Game{
         id: this.nextGameId,
+        name: fmt.Sprintf("Game #%d", this.nextGameId),
         numberOfPlayers: 2,
     }
     newGame.newPlayer = make(chan *Player)
@@ -180,7 +217,6 @@ func (this *GameManager) createGame(player *Player) {
 }
 
 func (this *GameManager) findMatchForPlayer(player *Player) {
-    player.ws.send <- []byte("I'm looking for your game bro")
     Info.Println("Looking for a room for the new player")
 
     // Looking for an existing game

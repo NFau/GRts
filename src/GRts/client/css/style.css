@@ -11,12 +11,18 @@ body {
     margin: 0;
 }
 
+input {
+    font-family: liberation sans-serif;
+}
+
 section.main {
     height:95%;
     text-align: center;
 }
 
-section.main div.connecting {
+section.main div.connecting,
+section.main div.connected,
+section.main div.disconnected {
     position: absolute;
     width: 100%;
     text-align: center;
@@ -25,8 +31,56 @@ section.main div.connecting {
     top: 50%;
 }
 
-section.main div.lobby {
+section.main div.disconnected span.smaller {
+    font-size: 0.5em;
+}
 
+section.main div.lobby {
+    position: absolute;
+    height: 25%;
+    width: 40%;
+    text-align: left;
+    left: 30%;
+    top: 40%;
+    transform: translate(0, -25%);
+    color: #4C4C4C;
+}
+
+section.main div.lobby .name {
+    font-size: 3em;
+    width: 100%;
+    border-bottom: 1px dashed #4C4C4C;
+}
+
+section.main div.lobby ul.players {
+    list-style: none;
+    font-size: 1.5em;
+}
+
+
+section.main div.lobby ul.players li{
+    line-height: 45px;
+}
+
+section.main div.lobby ul.players li.current-player {
+    color: #ffffff;
+}
+
+section.main div.lobby ul.players input {
+    line-height: 45px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #2D2D2D;
+    font-size: 1em;
+    color: #ffffff;
+}
+
+section.main div.lobby ul.players input:focus,
+section.main div.lobby ul.players input:active
+{
+    border: none;
+    border-bottom: 1px solid #2D2D2D;
+    outline: 0;
 }
 
 footer {
@@ -61,4 +115,9 @@ canvas#battlefield {
     background: #000;
     z-index: 100;
     box-shadow: 0px 0px 8px 5px;
+}
+
+.material-icons {
+    line-height: inherit !important;
+    vertical-align: middle;
 }

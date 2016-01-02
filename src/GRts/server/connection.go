@@ -76,7 +76,7 @@ func (this *Connection) WritePump() {
 				this.write(websocket.CloseMessage, []byte{})
 				return
 			}
-			if err := this.write(websocket.TextMessage, message); err != nil {
+			if err := this.write(websocket.BinaryMessage, message); err != nil {
 				return
 			}
 		case <-ticker.C:

@@ -8,7 +8,16 @@ class NetworkSerializer {
         this._grtsproto = this._builder.build('grtsproto');
 
         this._protomap = {
-            "CONNECTED": this._grtsproto.Connected
+            /* Receive */
+            "CONNECTED": this._grtsproto.Connected,
+            "JOINED_GAME": this._grtsproto.JoinedGame,
+            "PLAYER_JOINED_GAME": this._grtsproto.PlayerJoinedGame,
+            "PLAYER_LEFT_GAME": this._grtsproto.PlayerLeftGame,
+            "PLAYER_CHANGED_LOGIN": this._grtsproto.PlayerChangedLogin,
+
+            /* Send */
+            "CHANGE_LOGIN": this._grtsproto.ChangeLogin,
+            "LOBBY_READY": this._grtsproto.LobbyReady,
         }
     }
 
@@ -23,17 +32,22 @@ class NetworkSerializer {
     }
 
     decode(message) {
+        message = this._grtsproto.Message.decode(message);
         let protoer = this._getProtoer('Decode', message.type)
         if (!protoer) { return null; }
         message.data = protoer.decode(message.data);
         return message;
     }
 
-    encode(message) {
-        let protoer = this._getProtoer('Encode', message.type)
+    encode(type, data) {
+        let protoer = this._getProtoer('Decode', type);
         if (!protoer) { return null; }
-        message.data = new protoer(message.data).encode;
-        return message;
+        data = new protoer(data);
+        let message = new this._grtsproto.Message({
+            'type': type,
+            'data': data.encode()
+        })
+        return message.toBuffer();
     }
 }
 
@@ -51,8 +65,7 @@ class NetworkManager {
 
     /* Private methods */
     _onMessage(event) {
-        const message = JSON.parse(event.data);
-        const deserializedMessage = this._serializer.decode(message);
+        const deserializedMessage = this._serializer.decode(event.data);
         this._onMessageHandlers.forEach((handler) => {
             handler(deserializedMessage);
         });
@@ -79,6 +92,7 @@ class NetworkManager {
     /* Public methods */
     connect() {
         this._ws = new WebSocket("ws://127.0.0.1:8080/socket");
+        this._ws.binaryType = "arraybuffer";
         this._ws.onopen = this._onWSOpen.bind(this);
         this._ws.onclose = this._onWSClose.bind(this);
         this._ws.onmessage = this._onMessage.bind(this);
@@ -108,9 +122,10 @@ class NetworkManager {
         this._onWSCloseHandlers.remove(handler);
     }
 
-    send(message) {
-        const serializedMessage = this._serializer.encode(message);
-
+    send(type, data) {
+        console.log("Send", type, data);
+        const serializedMessage = this._serializer.encode(type, data);
+        this._ws.send(serializedMessage);
     }
 }
 

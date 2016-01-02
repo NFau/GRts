@@ -2,17 +2,56 @@ syntax = "proto3";
 
 package grtsproto;
 
+// TODO: Smarter proto :/
+
+message Message {
+    string      type = 1;
+    bytes       data = 2;
+}
+
+/* Common */
+message LobbyPlayer {
+    uint32     id = 1;
+    string     login = 2;
+    bool       ready = 3;
+}
+
+
 /* Server -> Client */
+
 message Connected {
     uint32      playerId = 1;
     string      playerLogin = 2;
 }
 
 message JoinedGame {
-    uint32      gameId = 2;
+    uint32      gameId = 1;
+    string      gameName = 2;
+
+    repeated LobbyPlayer players = 3;
+}
+
+message PlayerJoinedGame {
+    LobbyPlayer player = 1;
+}
+
+message PlayerLeftGame {
+    uint32      playerId = 1;
+}
+
+message PlayerChangedLogin {
+    LobbyPlayer player = 1;
+}
+
+message PlayerIsReady {
+    LobbyPlayer player = 1;
 }
 
 /* Client -> Server */
-message ChangeName {
-    string      name = 2;
+message ChangeLogin {
+    string      login = 1;
+}
+
+message LobbyReady {
+    bool        ready = 1;
 }
