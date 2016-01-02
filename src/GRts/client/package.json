@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "es6-enum": "^1.0.0",
-    "knockout": "^3.4.0"
+    "knockout": "^3.4.0",
+    "protobufjs": "~4.1.3"
   }
 }
